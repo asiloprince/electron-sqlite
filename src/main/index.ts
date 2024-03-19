@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { getSqlite3, insertFormData, fetchUsers } from './database/sqlite'
 import { createExpensesTable } from './database/models/expenses'
+import { handleFormSubmission } from './lib/addname'
 
 function createWindow(): void {
   // Create the browser window.
@@ -54,20 +55,12 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.on('form-submission', async (event, data) => {
-    console.log(data) // Logs the form data
-
-    // Get the database connection
-    const db = await getSqlite3()
-
-    // Insert the data into the database
-    insertFormData(db, data.name)
-  })
-  ipcMain.on('fetch-users', async (event) => {
-    const db = await getSqlite3()
-    const users = await fetchUsers(db)
-    event.reply('users', users)
-  })
+  ipcMain.on('form-submission', handleFormSubmission)
+  // ipcMain.on('fetch-users', async (event) => {
+  //   const db = await getSqlite3()
+  //   const users = await fetchUsers(db)
+  //   event.reply('users', users)
+  // })
   ipcMain.handle('fetch-users', async () => {
     const db = await getSqlite3()
     const users = await fetchUsers(db)
